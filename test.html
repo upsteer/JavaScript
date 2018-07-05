@@ -8,7 +8,7 @@
 
     <style>
         .slice text {
-            font-size: 10px;
+            font-size: 16px;
             font-family: Arial;
         }
         div.tooltip {   
@@ -23,10 +23,19 @@
             border-radius: 8px;         
             pointer-events: none;           
         }
-   
+    .legend {                                                   /* NEW */
+        font-size: 16px;                                          /* NEW */
+      }                                                           /* NEW */
+      rect {                                                      /* NEW */
+        stroke-width: 2;                                          /* NEW */
+      }                    
     </style>
   </head>
   <body>
+    <div class="legend4">
+       <h3>Donut Chart</h3>
+       <div class="legend4"></div>
+    </div>
     <script type="text/javascript">
 
     var w = 960,                        //width
@@ -34,18 +43,27 @@
     r = 250,                            //radius
     color = d3.scale.category10();     //builtin range of colors
 
-    data = [{"label":"Dipesh", "value":10, "rang": "#98abc5"}, 
+    data = [{"label":"Dipesh", "value":50, "rang": "#98abc5"}, 
             {"label":"Prashant", "value":50, "rang": "#8a89a6"}, 
             {"label":"Smriti", "value":40, "rang":  "#7b6888"},
             {"label":"Romit", "value":40, "rang":  "#6b486b"},
-            {"label":"Bachhan", "value":40, "rang":"#a05d56"},
+            {"label":"Dhake", "value":77, "rang":"#000000"},
             {"label":"Mouse", "value":40, "rang": "#ff0000"}
             ];
+    
+    var legendValsx = new Array();
 
+    for (i = 0; i<data.length; i++)
+    {
+        
+        legendValsx[i] =  data[i].label;
+        //console.log(legendValsx.split[]);
+    }
+       
 
     var arc = d3.svg.arc()              //this will create <path> elements for us using arc data
         .outerRadius(r-10)
-        .innerRadius(r-70);
+        .innerRadius(r-90);
 
     var div = d3.select("body").append("div")   
         .attr("class", "tooltip")               
@@ -60,10 +78,6 @@
         .append("svg:g")                //make a group to hold our pie chart
             .attr("transform", "translate(" + r + "," + r + ")")    //move the center of the pie chart from 0, 0 to radius, radius
 
-    
-
-    
-
     var pie = d3.layout.pie()           //this will create arc data for us given a list of values
         .value(function(d) { return d.value });    //we must tell it out to access the value of each element in our data array
 
@@ -75,22 +89,22 @@
 
         arcs.append("svg:path")
                 .attr("fill", function(d, i) { return data[i].rang; } ) //set the color for each slice to be chosen from the color function defined above
-                .attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
+                .attr("d", arc);              //this creates the actual SVG path using the associated data (pie) with the arc drawing function
         
         arcs.append("svg:text")                                     //add a label to each slice
                 .attr("transform", function(d) {                    //set the label's origin to the center of the arc
                 //we have to make sure to set these before calling arc.centroid
-                d.innerRadius = r-70;
+                d.innerRadius = r;
                 d.outerRadius = r-20;
                 return "translate(" + arc.centroid(d) + ")";        //this gives us a pair of coordinates like [50, 50]
             })
             .attr("text-anchor", "middle")                          //center the text on it's origin
-            .text(function(d, i) { return data[i].label; });        //get the label from our original data array        
+            //.text(function(d, i) { return data[i].value; });        //get the label from our original data array        
 
 
-        arcs.on("mouseover", function(d) {      
+        arcs.on("mousemove", function(d) {      
             div.transition()        
-                .duration(200)      
+                .duration(0)      
                 .style("opacity", 1);      
             div.html(d.value)  
                 .style("left", (d3.event.pageX) + "px")     
@@ -98,10 +112,59 @@
             })                  
         .on("mouseout", function(d) {       
             div.transition()        
-                .duration(500)      
+                .duration(0)      
                 .style("opacity", 0);   
         });
 
+        console.log(data.length);
+        
+        var width = 500;
+        var height = 75;
+        var svgw = 20;
+        var svgh = 20;
+
+        var svgLegned4 = d3.select(".legend4").append("svg")
+            .attr("width", width)
+            .attr("height", height - 50)
+
+
+        var dataL = 0;
+        var offset = 80;
+        //var legendVals2 = ["Queens", "Kings", "Bronx", "Manhatan","Richmond", "Yellow"]
+
+        var legend4 = svgLegned4.selectAll('.legends4')
+            .data(legendValsx)
+            .enter().append('g')
+            .attr("class", "legends4")
+            .attr("transform", function (d, i) {
+             if (i === 0) {
+                dataL = d.length + offset 
+                return "translate(0,0)"
+            } else { 
+             var newdataL = dataL
+             dataL +=  d.length + offset
+             return "translate(" + (newdataL) + ",0)"
+            }
+        })
+        
+        legend4.append('rect')
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("width", 10)
+            .attr("height", 10)
+            .style("fill", function(d, i) { return data[i].rang;
+        })
+        
+        legend4.append('text')
+            .attr("x", 20)
+            .attr("y", 10)
+        //.attr("dy", ".35em")
+        .text(function (d, i) {
+            return d
+        })
+            .attr("class", "textselected")
+            .style("text-anchor", "start")
+            .style("font-size", 15)
 
     </script>
   </body>
