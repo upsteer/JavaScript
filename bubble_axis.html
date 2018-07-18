@@ -1,36 +1,28 @@
-
-  
-  <html>
+<html>
     <head>
   <style>
       .chart rect {
           fill: steelblue;
       }
-
       .chart rect:hover {
               fill: turquoise;
           }
-
       .chart .rectM {
           stroke: green;
           stroke-width: 1;
           fill: green;
           fill-opacity: .2;
       }
-
       .chart .rectM:hover {
               fill: green;
               fill-opacity: .5;
       }
-
       .chart text {
           font: 10px sans-serif;
       }
-
       .chart .title {
           font: 15px sans-serif;
       }
-
       .axis path,
       .axis line {
           fill: none;
@@ -42,6 +34,10 @@
         top: 8px;
         right: 22px;
       }
+      .toprightdown{
+        position: absolute;
+        top: 42px;
+        right: 22px;
       }
       </style>
   <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
@@ -57,6 +53,7 @@
   <div class="container" align = "centre" id = "main">
 
     <button type="button" id = "button1" class="btn btn-info btn-sm topright" data-toggle="modal" data-target="#myModal">Modal</button>
+    <button type="button" class="btn btn-info btn-sm toprightdown" >Play</button>
     </div>
   </foreignObject>
   <p id="demo" align = "centre"></p>
@@ -80,14 +77,8 @@
             <button type="button" class = "btn btn-primary" onclick = myfunction()>Submit</button>
           </div>
         </div>
-        
       </div>
-
   <script>
-  //make_bubble(400,500, 40);
-  //function make_bubble(){
-
-    
 
   function myfunction()
   {
@@ -100,11 +91,9 @@
     else 
       update(!invert);
   }
-
   height = 500;
   width = 500;
   margin = 40;
-  var data =[];
   //var invert = myfunction();
   //console.log(invert);
   console.log(d3.select(svg));
@@ -115,81 +104,10 @@
                       .append("g")
                       .attr("transform", "translate(" + margin + "," + margin + ")");
                         //console.log("mouse"
-
-  function update(invert) {
-    var t = d3.transition();
-    svg.selectAll('circle')
-    .remove();
-
-    svg.selectAll('g')
-    .remove();
-
-    svg.append("g")
-      .attr("class", "x axis")
-      .call(yAxis)
-      .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("x", -height/2)
-        .attr("y", -margin)
-        .attr("dy", ".71em")
-        .style("text-anchor", "mid")
-                      .text(labelY);
-                            // x axis and label
-    svg.append("g")
-      .attr("class", "y axis")
-      .attr("transform", "translate(0," + height + ")")
-      .call(xAxis)
-        .append("text")
-        .attr("x", width/2)
-        .attr("y", margin - 10)
-        .attr("dy", ".71em")
-        .style("text-anchor", "end")
-        .text(labelX);
-
-    svg.selectAll("circle")
-                .data(data)
-                .enter()
-                .insert("circle")
-                .attr("cx", width / 2)
-                .attr("cy", height / 2)
-                .attr("opacity", function (d) { return opacity(d.size); })
-                .attr("r", function (d) { return scale(d.size); })
-                .style("fill", function (d) { return color(d.c); })
-                .on('mouseover', function (d, i) { fade(d.c, .1); })
-                .on('mouseout', function (d, i) { fadeOut();})
-                .transition()
-                .delay(function (d, i) { return x(d.y) - y(d.x); })
-                .duration(500)
-                .attr("cx", function (d) { if(invert == true) 
-                return x(d.y);
-                else 
-                return x(d.x); })
-                .attr("cy", function (d) { if(invert == true)
-                return y(d.x);
-                else
-                return y(d.y); })
-                .ease("bounce");
-
-                function fade(c, opacity) {
-                svg.selectAll("circle")
-                    .filter(function (d) {
-                        return d.c != c;
-                    })
-                  .transition()
-                   .style("opacity", opacity);
-                }
-
-                function fadeOut() {
-                  svg.selectAll("circle")
-                  .transition()
-                     .style("opacity", function (d) { opacity(d.size); });
-                }
-  }
-
+  
   var labelX = 'Names';
   var labelY = 'Value';
-
-  data.push({x:4, y:8, c:1, size:150},
+  /*data.push({x:4, y:8, c:1, size:150},
             {x:4, y:6, c:4, size:102},
             {x:2, y:4, c:3, size:178},
             {x:8, y:9, c:5, size:163},
@@ -205,35 +123,107 @@
             {x:6, y:12, c:3, size:140},
             {x:7, y:6, c:3, size:140},
             {x:8, y:6, c:1, size:1});
-
-
-  var max = Math.max(d3.max(data, function(d){return d.x}), d3.max(data, function(d){return d.y}));
+  console.log(data);*/
+  var data1 =[];
+  d3.json("data.json", function (data)
+  {
+    console.log(data);
+    for(var i = 0; i< data.length; i++)
+    {
+      data1.push({
+        x: data[i].x,
+        y: data[i].y,
+        c: data[i].c,
+        size: data[i].size,
+      })
+    }
+  });
+  console.log(data1);
+  
+function update(invert) {
+  var max = Math.max(d3.max(data1, function(d){return d.x}), d3.max(data1, function(d){return d.y}));
                
   var x = d3.scale.linear()
         .domain([0, max+1])
           .range([0, width]);
-
   var y = d3.scale.linear()
             .domain([0, max+1])
         .range([height, 0]);
-
   var scale = d3.scale.sqrt()
-                        .domain([d3.min(data, function (d) { return d.size; }), d3.max(data, function (d) { return d.size; })])
+                        .domain([d3.min(data1, function (d) { return d.size; }), d3.max(data1, function (d) { return d.size; })])
                         .range([1, 20]);
-
   var opacity = d3.scale.sqrt()
-                        .domain([d3.min(data, function (d) { return d.size; }), d3.max(data, function (d) { return d.size; })])
+                        .domain([d3.min(data1, function (d) { return d.size; }), d3.max(data1, function (d) { return d.size; })])
                         .range([1, .5]);
                                   
   var color = d3.scale.category10();
-
   var xAxis = d3.svg.axis().scale(x).orient("bottom");
-
   var yAxis = d3.svg.axis().scale(y).orient("left");
-    
-  var division = d3.select("#main");
 
+    var t = d3.transition();
+    svg.selectAll('circle')
+    .remove();
+    svg.selectAll('g')
+    .remove();
+    svg.append("g")
+      .attr("class", "x axis")
+      .call(yAxis)
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height/2)
+        .attr("y", -margin)
+        .attr("dy", ".71em")
+        .style("text-anchor", "mid")
+                      .text(labelY);
+                            
+    svg.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+        .append("text")
+        .attr("x", width/2)
+        .attr("y", margin - 10)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text(labelX);
+
+    svg.selectAll("circle")
+          .data(data1)
+          .enter()
+          .insert("circle")
+          .attr("cx", width / 2)
+          .attr("cy", height / 2)
+          .attr("opacity", function (d) { return opacity(d.size); })
+          .attr("r", function (d) { return scale(d.size); })
+          .style("fill", function (d) { return color(d.c); })
+          .on('mouseover', function (d, i) { fade(d.c, .1); })
+          .on('mouseout', function (d, i) { fadeOut();})
+          .transition()
+          .delay(function (d, i) { return x(d.y) - y(d.x); })
+          .duration(500)
+          .attr("cx", function (d) { if(invert == true) 
+          return x(d.y);
+          else 
+          return x(d.x); })
+          .attr("cy", function (d) { if(invert == true)
+          return y(d.x);
+          else
+          return y(d.y); })
+          .ease("bounce");
+          function fade(c, opacity) {
+          svg.selectAll("circle")
+              .filter(function (d) {
+                  return d.c != c;
+              })
+            .transition()
+             .style("opacity", opacity);
+          }
+          function fadeOut() {
+            svg.selectAll("circle")
+            .transition()
+               .style("opacity", function (d) { opacity(d.size); });
+          }
+  }
   </script>
   </body>
   </html>
-
