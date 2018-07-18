@@ -1,4 +1,5 @@
 
+  
   <html>
     <head>
   <style>
@@ -39,7 +40,7 @@
       .topright{
         position: absolute;
         top: 8px;
-        right: 20px;
+        right: 22px;
       }
       }
       </style>
@@ -118,6 +119,9 @@
   function update(invert) {
     var t = d3.transition();
     svg.selectAll('circle')
+    .remove();
+
+    svg.selectAll('g')
     .remove();
 
     svg.append("g")
@@ -243,3 +247,4 @@
   </script>
   </body>
   </html>
+
