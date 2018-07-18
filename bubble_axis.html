@@ -207,17 +207,6 @@
             {x:8, y:6, c:1, size:1});
 
 
-
-  var bulk = [{name:"Sarangi", value:1},
-              {name:"Retaula",value:2 },
-              {name:"Mauka",value:3 },
-              {name:"Mile",value:4 },
-              {name:"Pheri",value:5 },
-              {name:"Bhetaula",value:6 },
-              {name:"Hai",value:7 },
-              {name:"Ta",value:8 },
-              {name:"?",value:9 }];
-
   var max = Math.max(d3.max(data, function(d){return d.x}), d3.max(data, function(d){return d.y}));
                
   var x = d3.scale.linear()
