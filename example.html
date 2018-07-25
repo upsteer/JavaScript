@@ -1,0 +1,351 @@
+<html>
+    <head>
+  <style>
+      .chart rect {
+          fill: steelblue;
+      }
+      .chart rect:hover {
+              fill: turquoise;
+          }
+      .chart .rectM {
+          stroke: green;
+          stroke-width: 1;
+          fill: green;
+          fill-opacity: .2;
+      }
+      .chart .rectM:hover {
+              fill: green;
+              fill-opacity: .5;
+      }
+      .chart text {
+          font: 10px sans-serif;
+      }
+      .chart .title {
+          font: 15px sans-serif;
+      }
+      .axis path,
+      .axis line {
+          fill: none;
+          stroke: #000;
+          shape-rendering: crispEdges;
+      }
+      .topright{
+        position: absolute;
+        top: 8px;
+        right: 22px;
+      }
+      </style>
+  <script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.4.11/d3.min.js"></script>
+  <meta name="viewport" content="width=100, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+  <svg id="chart" xmlns="http://www.w3.org/2000/svg" width="500" height="500">
+
+  <foreignObject x="0" y="0" width="600" height="600">
+  <div class="container" align = "centre" id = "main">
+
+    <button type="button" onclick="playdata()" class="btn btn-info btn-sm topright">Play</button>
+    </div>
+  </foreignObject>
+  <p id="demo" align = "centre"></p>
+  </svg>
+  
+  <script>
+
+  height = 500;
+  width = 600;
+  margin = 40;
+  var invert = false;
+  //var invert = myfunction();
+  //console.log(invert);
+  //console.log(d3.select(svg));
+  var svg = d3.select('#chart')
+                      .attr('class', 'chart')
+                      .attr("width", width + margin + margin)
+                      .attr("height", height + margin + margin)
+                      .append("g")
+                      .attr("transform", "translate(" + margin + "," + margin + ")");
+                        //console.log("mouse"
+
+  var labelX = 'Date';
+  var labelY = 'Value';
+
+  var data = [];
+  data.push(  {"date": "2012-6-01","x":4, "y":8, "c":1, "size":150},
+              {"date": "2012-6-01","x":4, "y":6, "c":4, "size":102},
+              {"date": "2012-6-01","x":2, "y":4, "c":3, "size":178},
+              {"date": "2012-6-04","x":8, "y":9, "c":5, "size":163},
+              {"date": "2012-6-05","x":3, "y":7, "c":3, "size":163},
+              {"date": "2012-6-06","x":2, "y":8, "c":4, "size":133},
+              {"date": "2012-6-07","x":5, "y":3, "c":4, "size":163},
+              {"date": "2012-6-08","x":7, "y":9, "c":2, "size":140},
+              {"date": "2012-6-09","x":5, "y":5, "c":3, "size":140},
+              {"date": "2012-6-10","x":7, "y":2, "c":2, "size":140},
+              {"date": "2012-6-11","x":8, "y":1, "c":4, "size":140},
+              {"date": "2012-6-12","x":9, "y":4, "c":5, "size":140},
+              {"date": "2012-6-13","x":2, "y":2, "c":1, "size":140},
+              {"date": "2012-6-14","x":6, "y":12, "c":3, "size":140},
+              {"date": "2012-6-15","x":7, "y":6, "c":3, "size":140},
+              {"date": "2012-6-16","x":8, "y":6, "c":1, "size":1});
+  //console.log(data);
+
+
+  var max = Math.max(d3.max(data, function(d){return d.x}), d3.max(data, function(d){return d.y}));
+
+  const now = Date.now();
+
+  var xScale = d3.time.scale().domain([now - 10000, now]).range([0, width]);
+
+  var minDate = new Date (data[0].date);
+  var maxDate = new Date (data[15].date);
+
+  var timeFormat = d3.time.format('%Y-%m-%d');
+  var timeScale = d3.time.scale().domain([minDate, maxDate]).range([1,16]);
+
+  console.log(timeScale(new Date (data[1].date)));
+
+for(var i=0;i<16; i++)
+{
+  data[i].x = timeScale(new Date (data[i].date));
+}
+
+//console.log(data);
+
+  var x = d3.scale.linear()
+        .domain([1, data.length])
+          .range([0, width]);
+  var y = d3.scale.linear()
+            .domain([0, max+1])
+        .range([height, 0]);
+
+  var scale = d3.scale.sqrt()
+                        .domain([d3.min(data, function (d) { return d.size; }), d3.max(data, function (d) { return d.size; })])
+                        .range([1, 20]);
+
+  var opacity = d3.scale.sqrt()
+                        .domain([d3.min(data, function (d) { return d.size; }), d3.max(data, function (d) { return d.size; })])
+                        .range([1, .5]);
+  
+  var time = d3.time.scale().domain([minDate, maxDate])
+    .range([0, width]);                             
+  
+  var color = d3.scale.category10();
+  var xAxis = d3.svg.axis().scale(time);
+  var yAxis = d3.svg.axis().scale(y).orient("left");
+  //drawCircles();
+//    var t = d3.transition().duration(1000).ease(d3.linear);
+  
+    svg.append("g")
+      .attr("class", "x axis")
+      .call(yAxis)
+      .append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height/2)
+        .attr("y", -margin)
+        .attr("dy", ".71em")
+        .style("text-anchor", "mid")
+                      .text(labelY);
+                            
+    svg.append("g")
+      .attr("class", "y axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(xAxis)
+        .append("text")
+        .attr("x", width/2)
+        .attr("y", margin - 10)
+        .attr("dy", ".71em")
+        .style("text-anchor", "end")
+        .text(labelX);
+
+ var results = data.reduce(function(results, find) {
+      (results[find.date] = results[find.date] || []).push(find);
+      return results;
+  }, {})
+
+var yellow = [];
+for(var i = 0; i<data.length; i++)
+  yellow[i] = data[i].date;
+//console.log(yellow);
+
+var filteredArray = yellow.filter(function(item, pos)
+{
+  return yellow.indexOf(item) == pos;
+});
+
+//console.log(filteredArray)
+
+//console.log(typeof(results['2012-6-01']));
+
+    svg.selectAll("circle")
+          .data(data)
+          .enter()
+          .append("circle")
+          .attr("class", function(d, i){if(x(d.x)==0)
+            return "circle1"
+            else return "circle" + (i+1)})
+          .attr("cx", function(d,i){
+            return x(d.x);
+          })
+          .attr("cy", function(d,i){
+            return y(d.y);
+          })
+          //.attr("opacity", function (d) { return opacity(d.size); })
+          .attr("r", function (d) { return scale(d.size); })
+          .style("fill", function (d) { return color(d.c); })
+          .on('mouseover', function (d, i) { fade(d.c, .1); })
+          .on('mouseout', function (d, i) { fadeOut();})
+          
+          
+  function fade(c, opacity) {
+          svg.selectAll("circle")
+              .filter(function (d) {
+                  return d.c != c;
+              })
+            .transition()
+            .style("opacity", opacity);
+          }
+  function fadeOut() {
+            svg.selectAll("circle")
+            .transition()
+               .style("opacity", function (d) { opacity(d.size); });
+          }
+var i = 0;
+function playdata(){
+
+//   console.log(data[i].y);
+    svg.selectAll("circle").remove();
+    //var sortable = [];
+    //console.log(data);
+    //if(i<data.length)
+   //var x = setInterval(animate, 2000);
+   //console.log(x);
+   animate();
+   //myLoop();
+   i = 0;
+}
+
+function animate(){
+   
+  //svg.selectAll("circle").remove();
+  console.log(results);
+  var time = setInterval(function(){
+    console.log("yellow");
+  }, 2000);
+  //console.log(results[filteredArray[0]].length);
+//   var t = setInterval(function(){
+//   results[filteredArray[i]].forEach(function(d, i){
+//     var circle = svg.append("circle")
+//                   .datum(d)
+//                   .attr("cx", function(d) {
+//                       return x(d.x);
+//                   })
+//                   .attr("cy", function(d) {
+//                       return y(d.y);
+//                   })                 
+//                   .attr("r", function (d) { return scale(d.size); })
+//                   .style("fill", function (d) { return color(d.c); })
+//                   .transition()
+//                   .delay(1000)
+//                   .attr("r", 0) ;
+//   })
+//   i++;
+// }, 2000);
+  console.log(time);
+  
+  //for (var i = 0; i <filteredArray.length; i++) {
+  // if(i<filteredArray.length){
+  // svg.append("circle")
+  //   .datum(results[filteredArray[]])
+  //         .attr("cx", 0)
+  //         .attr("cy", 0)
+  //         .attr("r", function (d) { return scale(d.size); })
+  //         .style("fill", function (d) { return color(d.c); })
+  //         .transition()
+  //         .delay(function (d, i) { return x(d.y) - y(d.x); })
+  //         .attr("cx", function(d, i){
+  //           console.log("yell")
+  //           return x(d.x)
+  //         })
+  //         .attr("cy", function(d, i){
+  //           return y(d.y)
+  //         });
+  //         i++;
+  // }
+  // else 
+  //   return 0;
+
+
+//   for (var i = 0; i < filteredArray.length; i++) {
+
+//   results[filteredArray[i]].forEach(function(d,i)
+//   {
+//     setTimeout(function() {
+//         svg.append("circle")
+//             .datum(d)
+//             .attr("cx", function(d) {
+//                 return x(d.x);
+//             })
+//             .attr("cy", function(d) {
+//                 return y(d.y);
+//             })                 
+//             .attr("r", function (d) { return scale(d.size); })
+//             .style("fill", function (d) { return color(d.c); })             
+//     }, i*500);
+//   })
+// }
+}
+        // svg.append("circle")
+        // .data(results)
+        // .enter()
+        // .attr("cx", 0)
+        // .attr("cy", height)
+        // .transition()
+        // .delay(x(data[i].x)-y(data[i].y))
+        // .duration(1000)
+        // .attr("cx", x(data[i].x))
+        // .attr("cy", y(data[i].y))
+        // .attr("r", scale(data[i].size))
+        // .style("fill", function (d) { return color(data[i].c); })
+        // .ease("d3.linear");        
+        //animate(i++);
+function myLoop () {    
+
+// svg
+// .data(results)
+// .interval(2000)
+// .text('h')
+// return 
+       //  create a loop function
+   //setTimeout(function () {    //  call a 1s setTimeout when the loop is called
+
+      results[filteredArray[i]].forEach(function(d,i)
+        {
+          setTimeout(function() {
+              svg.append("circle")
+                  .datum(d)
+                  .attr("cx", function(d) {
+                      return x(d.x);
+                  })
+                  .attr("cy", function(d) {
+                      return y(d.y);
+                  })                 
+                  .attr("r", function (d) { return scale(d.size); })
+                  .style("fill", function (d) { return color(d.c); }); 
+                  //svg.selectAll(".circle" + (i)).remove()            
+          }, 5000);
+        })
+      i++;                     //  increment the counter
+      if (i < filteredArray.length) {            //  if the counter < 10, call the loop function
+         myLoop();             //  ..  again which will trigger another 
+      }                        //  ..  setTimeout()
+   //}, 1000)
+}
+
+
+//myLoop();    
+</script>
+</body>
+</html>
